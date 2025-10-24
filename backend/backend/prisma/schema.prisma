@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 反馈主表
+model Feedback {
+  id                String   @id @default(uuid()) // 唯一标识（UUID）
+  feedbackNo        String   @unique // 展示给用户的反馈ID（6位数字+字母）
+  type              String   // 反馈类型（关联配置表）
+  content           String   // 反馈文本内容
+  status            String   @default("PENDING") // 状态：PENDING/PROCESSING/SOLVED/REJECTED
+  reply             String?  // 处理回复（仅SOLVED/REJECTED时有值）
+  createdAt         DateTime @default(now()) // 提交时间
+  updatedAt         DateTime @updatedAt // 更新时间（状态变更时）
+  mediaFiles        MediaFile[] // 关联的媒体文件
+  operationLogs     OperationLog[] // 关联的操作日志
+  externalSystemId  String? // 外部系统ID，为空表示用户提交
+  externalSystem    ExternalSystem? @relation(fields: [externalSystemId], references: [id])
+
+  @@map("feedback")
+}
+
+// 媒体文件表（反馈附件）
+model MediaFile {
+  id          String   @id @default(uuid())
+  feedbackId  String
+  feedback    Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  fileName    String   // 文件名
+  fileUrl     String   // 文件存储路径（如：/media/feedback/xxx.jpg）
+  fileType    String   // 文件类型（image/jpeg, video/mp4等）
+  fileSize    Int      // 文件大小（字节）
+  createdAt   DateTime @default(now())
+
+  @@map("media_files")
+}
+
+// 操作日志表（记录管理员处理行为）
+model OperationLog {
+  id          String   @id @default(uuid())
+  feedbackId  String
+  feedback    Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  action      String   // 操作类型：UPDATE_STATUS/REPLY
+  content     String   // 操作内容（如：状态从PENDING改为PROCESSING）
+  operator    String   @default("admin") // 操作人（固定为admin）
+  createdAt   DateTime @default(now())
+
+  @@map("operation_logs")
+}
+
+// 系统配置表
+model SystemConfig {
+  id          String   @id @default(uuid())
+  key         String   @unique // 配置键：FEEDBACK_TYPES/UPLOAD_LIMIT等
+  value       String   // 配置值（JSON字符串）
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_configs")
+}
+
+// 外部调用API密钥表
+model ApiKey {
+  id                String   @id @default(uuid())
+  key               String   @unique // 加密存储的API密钥
+  status            Boolean  @default(true) // 是否启用
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  externalSystemId  String
+  externalSystem    ExternalSystem @relation(fields: [externalSystemId], references: [id])
+
+  @@map("api_keys")
+}
+
+// 外部系统表
+model ExternalSystem {
+  id          String   @id @default(uuid())
+  name        String   @unique // 外部系统名称
+  description String?  // 系统描述
+  status      Boolean  @default(true) // 是否启用
+  permissions String[] // 权限列表，如["feedback:submit", "feedback:query", "stats:view"]
+  rateLimit   Int      @default(100) // 每秒最大调用次数
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  apiKeys     ApiKey[]
+  feedbacks   Feedback[]
+  apiCallLogs ApiCallLog[]
+
+  @@map("external_systems")
+}
+
+// API调用日志表
+model ApiCallLog {
+  id                String   @id @default(uuid())
+  externalSystemId  String
+  externalSystem    ExternalSystem @relation(fields: [externalSystemId], references: [id])
+  apiPath           String   // 调用的API路径
+  method            String   // HTTP方法
+  statusCode        Int      // 响应状态码
+  requestTime       DateTime @default(now()) // 请求时间
+  responseTime      Int?     // 响应时间（毫秒）
+  requestId         String   // 请求唯一标识
+
+  @@map("api_call_logs")
+}
+
+// 用户表（管理员用户）
+model User {
+  id                String       @id @default(cuid())
+  email             String       @unique
+  phone             String?      @unique
+  username          String       @unique
+  password          String
+  role              UserRole     @default(USER)
+  avatar            String?
+  isActive          Boolean      @default(true)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  PROCESSOR
+  ADMIN
+}
