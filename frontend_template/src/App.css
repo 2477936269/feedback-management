@@ -1,0 +1,45 @@
+.app-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f2f5;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 菜单项自定义样式 - 添加到现有的App.css文件中 */
+
+/* 选中项圆角 */
+.ant-menu-light .ant-menu-item-selected {
+  border-radius: 2px !important;  /* 使用!important确保优先级 */
+}
+
+/* 悬停时的圆角 */
+.ant-menu-light .ant-menu-item:hover {
+  border-radius: 2px !important;
+}
+
+/* 如果需要调整选中项的内边距，让圆角效果更明显 */
+.ant-menu-inline .ant-menu-item {
+  margin: 8px 8px !important;
+  width: calc(100% - 16px) !important;
+}

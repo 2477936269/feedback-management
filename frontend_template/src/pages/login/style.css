@@ -1,0 +1,42 @@
+.login-container {
+  background-color: #f0f2f5;
+  background-image: url('https://gw.alipayobjects.com/zos/rmsportal/TVYTbAXWheQpRcWDaDMu.svg');
+  background-repeat: no-repeat;
+  background-position: center 110px;
+  background-size: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.login-card {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05), 0 5px 15px rgba(0,0,0,0.03);
+  border-radius: 4px;
+  margin-top: -60px;
+}
+
+.login-card .ant-card-head-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.login-form-forgot {
+  float: right;
+}
+
+.login-form-button {
+  width: 100%;
+}
+
+/* 修改所有输入框前缀图标的颜色透明度 */
+.ant-input-prefix .anticon {
+  opacity: 0.5; /* 设置透明度为 0.5，可以根据需要调整 */
+  color: #1890ff; /* 可以设置图标的基础颜色 */
+}
+
+/* 当输入框获得焦点时，可以改变图标的透明度 */
+.ant-input-affix-wrapper-focused .ant-input-prefix .anticon {
+  opacity: 0.8; /* 焦点状态下增加透明度 */
+}
